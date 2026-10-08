@@ -20,7 +20,9 @@ public final class UserService {
                 VALUES (?, ?, ?)
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+
                 PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, username);
@@ -49,16 +51,20 @@ public final class UserService {
         String sql = """
                 SELECT id
                 FROM users
-                WHERE username = ? AND password_hash = ?
+                WHERE username = ?
+                AND password_hash = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+
                 PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, username);
             statement.setString(2, password);
 
-            try (ResultSet result = statement.executeQuery()) {
+            try (
+                    ResultSet result = statement.executeQuery()) {
 
                 return result.next();
             }
@@ -74,12 +80,15 @@ public final class UserService {
                 WHERE username = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+
                 PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, username);
 
-            try (ResultSet result = statement.executeQuery()) {
+            try (
+                    ResultSet result = statement.executeQuery()) {
 
                 if (result.next()) {
                     return result.getInt("id");
@@ -99,18 +108,21 @@ public final class UserService {
                 WHERE username = ?
                 """;
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+
                 PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, username);
 
-            try (ResultSet result = statement.executeQuery()) {
+            try (
+                    ResultSet result = statement.executeQuery()) {
 
                 return result.next();
             }
         }
     }
-  
+
     public static List<String> allUsernames()
             throws SQLException {
 
@@ -122,8 +134,11 @@ public final class UserService {
 
         List<String> usernames = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnection.getConnection();
+        try (
+                Connection connection = DatabaseConnection.getConnection();
+
                 PreparedStatement statement = connection.prepareStatement(sql);
+
                 ResultSet result = statement.executeQuery()) {
 
             while (result.next()) {
