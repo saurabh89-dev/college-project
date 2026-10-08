@@ -13,7 +13,6 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private BufferedReader reader;
     private PrintWriter writer;
-
     private String username;
     private int userId;
 
@@ -24,22 +23,14 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            reader = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-
-            writer = new PrintWriter(
-                    socket.getOutputStream(),
-                    true,
-                    StandardCharsets.UTF_8);
-
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+            writer = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
             loginUser();
 
             String input;
-
             while ((input = reader.readLine()) != null) {
                 handleRequest(input);
             }
-
         } catch (IOException exception) {
             System.out.println("Client disconnected.");
         } finally {
@@ -49,21 +40,17 @@ public class ClientHandler implements Runnable {
 
     private void loginUser() throws IOException {
         String loginRequest = reader.readLine();
-
         if (loginRequest == null || !loginRequest.startsWith("LOGIN|")) {
             sendMessage("ERROR|Login request is invalid.");
             throw new IOException("Invalid login request.");
         }
 
         username = loginRequest.substring(6).trim();
-
         try {
             userId = getUserId(username);
         } catch (SQLException exception) {
             sendMessage("ERROR|Database error while logging in.");
-            throw new IOException(
-                    "Could not check user in database.",
-                    exception);
+            throw new IOException("Could not check user in database.", exception);
         }
 
         if (userId == 0) {
@@ -77,13 +64,11 @@ public class ClientHandler implements Runnable {
         }
 
         sendMessage("LOGIN_OK|Welcome " + username);
-
         System.out.println(username + " connected.");
     }
 
     private void handleRequest(String input) {
         String[] parts = input.split("\\|", 3);
-
         if (parts.length == 3 && parts[0].equals("SEND")) {
             String receiverUsername = parts[1].trim();
             String messageText = parts[2].trim();
@@ -92,7 +77,6 @@ public class ClientHandler implements Runnable {
                 sendMessage("ERROR|Receiver and message cannot be empty.");
                 return;
             }
-
             saveAndSendMessage(receiverUsername, messageText);
         } else {
             sendMessage("ERROR|Unknown command.");
@@ -102,12 +86,10 @@ public class ClientHandler implements Runnable {
     private void saveAndSendMessage(String receiverUsername, String messageText) {
         try {
             int receiverId = getUserId(receiverUsername);
-
             if (receiverId == 0) {
                 sendMessage("ERROR|Receiver username does not exist.");
                 return;
             }
-
             if (receiverId == userId) {
                 sendMessage("ERROR|You cannot message yourself.");
                 return;
@@ -117,15 +99,9 @@ public class ClientHandler implements Runnable {
             saveMessage(conversationId, userId, messageText);
 
             String realTimeMessage = "MESSAGE|" + username + "|" + messageText;
-
-            // Show message to sender.
             sendMessage(realTimeMessage);
-
-            // Send message instantly if receiver is online.
             ChatServer.sendToUser(receiverUsername, realTimeMessage);
-
             sendMessage("STATUS|Message saved successfully.");
-
         } catch (SQLException exception) {
             sendMessage("ERROR|Database error: " + exception.getMessage());
         }
@@ -133,19 +109,15 @@ public class ClientHandler implements Runnable {
 
     private int getUserId(String requestedUsername) throws SQLException {
         String sql = "SELECT id FROM users WHERE username = ?";
-
         try (Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, requestedUsername);
-
             try (ResultSet result = statement.executeQuery()) {
                 if (result.next()) {
                     return result.getInt("id");
                 }
             }
         }
-
         return 0;
     }
 
@@ -154,16 +126,16 @@ public class ClientHandler implements Runnable {
         int userTwoId = Math.max(firstUserId, secondUserId);
 
         String findSql = """
-                SELECT id FROM conversations
-                WHERE user_one_id = ? AND user_two_id = ?
+                SELECT id
+                FROM conversations
+                WHERE user_one_id = ?
+                AND user_two_id = ?
                 """;
 
         try (Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(findSql)) {
-
+             PreparedStatement statement = connection.prepareStatement(findSql)) {
             statement.setInt(1, userOneId);
             statement.setInt(2, userTwoId);
-
             try (ResultSet result = statement.executeQuery()) {
                 if (result.next()) {
                     return result.getInt("id");
@@ -172,19 +144,18 @@ public class ClientHandler implements Runnable {
         }
 
         String insertSql = """
-                INSERT INTO conversations (user_one_id, user_two_id)
+                INSERT INTO conversations
+                (user_one_id, user_two_id)
                 VALUES (?, ?)
                 """;
 
         try (Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(
-                        insertSql,
-                        PreparedStatement.RETURN_GENERATED_KEYS)) {
-
+             PreparedStatement statement = connection.prepareStatement(
+                     insertSql,
+                     PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, userOneId);
             statement.setInt(2, userTwoId);
             statement.executeUpdate();
-
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 if (keys.next()) {
                     return keys.getInt(1);
@@ -197,15 +168,14 @@ public class ClientHandler implements Runnable {
 
     private void saveMessage(int conversationId, int senderId, String messageText)
             throws SQLException {
-
         String sql = """
-                INSERT INTO messages (conversation_id, sender_id, message_text)
+                INSERT INTO messages
+                (conversation_id, sender_id, message_text)
                 VALUES (?, ?, ?)
                 """;
 
         try (Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, conversationId);
             statement.setInt(2, senderId);
             statement.setString(3, messageText);
@@ -221,12 +191,10 @@ public class ClientHandler implements Runnable {
 
     private void closeConnection() {
         ChatServer.removeOnlineUser(username);
-
         try {
             socket.close();
         } catch (IOException ignored) {
         }
-
         if (username != null) {
             System.out.println(username + " disconnected.");
         }
