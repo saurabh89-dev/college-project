@@ -51,8 +51,6 @@ public class LoginScreen extends Application {
         stage.show();
     }
 
-    
-
     private void showLoginScreen() {
 
         Label logo = new Label("EchoLoop");
@@ -186,8 +184,6 @@ public class LoginScreen extends Application {
                 new Scene(root, 1000, 650));
     }
 
-    
-
     private void showRegisterScreen() {
 
         Label title = new Label("Create EchoLoop Account");
@@ -308,8 +304,6 @@ public class LoginScreen extends Application {
                 new Scene(root, 1000, 650));
     }
 
-    
-
     private void showChatScreen(
             String loggedInUsername) {
 
@@ -341,8 +335,6 @@ public class LoginScreen extends Application {
 
         stage.show();
     }
-
-   
 
     private VBox createSidebar(
             String loggedInUsername) {
@@ -385,7 +377,6 @@ public class LoginScreen extends Application {
 
         ObservableList<String> visibleUsers = FXCollections.observableArrayList();
 
-       
         try {
 
             List<String> databaseUsers = UserService.allUsernames();
@@ -522,8 +513,6 @@ public class LoginScreen extends Application {
 
         return sidebar;
     }
-
-   
 
     private VBox createChatArea() {
 
@@ -663,8 +652,6 @@ public class LoginScreen extends Application {
         return chatArea;
     }
 
-   
-
     private void sendMessage(
             TextField messageInput) {
 
@@ -703,16 +690,12 @@ public class LoginScreen extends Application {
             return;
         }
 
-      
-      
         chatClient.sendMessage(
                 selectedUser,
                 text);
 
         messageInput.clear();
     }
-
-   
 
     private void handleServerMessage(
             String message) {
@@ -797,8 +780,6 @@ public class LoginScreen extends Application {
         }
     }
 
-    
-
     private void addMessage(
             String text,
             boolean sentByMe) {
@@ -849,8 +830,6 @@ public class LoginScreen extends Application {
                 .add(messageRow);
     }
 
-    
-
     private void loadConversationHistory() {
 
         if (messageBox == null) {
@@ -898,8 +877,6 @@ public class LoginScreen extends Application {
                             + exception.getMessage());
         }
     }
-
-  
 
     private void logout() {
 
@@ -965,3 +942,4 @@ public class LoginScreen extends Application {
         launch(args);
     }
 }
+
