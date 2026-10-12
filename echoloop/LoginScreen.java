@@ -321,32 +321,24 @@ public class LoginScreen extends Application {
                         String loggedInUsername) {
 
                 currentUser = loggedInUsername;
-
                 selectedUser = null;
 
                 BorderPane root = new BorderPane();
-
-                root.setStyle(
-                                "-fx-background-color: "
-                                                + BACKGROUND + ";");
-
-                VBox sidebar = createSidebar(
-                                loggedInUsername);
-
-                root.setLeft(sidebar);
+                root.setStyle("-fx-background-color: " + BACKGROUND + ";");
 
                 VBox chatArea = createChatArea();
-
                 root.setCenter(chatArea);
 
-                stage.setTitle(
-                                "EchoLoop - Chat - "
-                                                + loggedInUsername);
+                VBox sidebar = createSidebar(loggedInUsername);
+                root.setLeft(sidebar);
 
-                stage.setScene(
-                                new Scene(root, 1200, 720));
-
+                stage.setTitle("EchoLoop - Chat - " + loggedInUsername);
+                stage.setScene(new Scene(root, 1200, 720));
                 stage.show();
+
+                if (selectedUser != null) {
+                        loadConversationHistory();
+                }
         }
 
         private VBox createSidebar(
@@ -712,44 +704,38 @@ public class LoginScreen extends Application {
         private void handleServerMessage(
                         String message) {
 
-                if (message == null) {
+                if (message == null || message.isBlank()) {
                         return;
                 }
 
-                System.out.println(
-                                "Server: " + message);
+                System.out.println("Server message received: " + message);
 
-                String[] parts = message.split(
-                                "\\|",
-                                3);
-
-                if (parts.length == 0) {
-                        return;
-                }
+                String[] parts = message.split("\\|", 3);
 
                 switch (parts[0]) {
 
                         case "MESSAGE":
 
                                 if (parts.length < 3) {
+                                        System.out.println("Invalid MESSAGE format: " + message);
                                         return;
                                 }
 
                                 String sender = parts[1];
-
                                 String text = parts[2];
 
                                 if (sender.equals(currentUser)) {
-
-                                        addMessage(
-                                                        text,
-                                                        true);
-
+                                        
+                                        if (sender.equals(currentUser)) {
+                                                addMessage(text, true);
+                                        }
                                 } else if (sender.equals(selectedUser)) {
-
-                                        addMessage(
-                                                        text,
-                                                        false);
+                                        
+                                        addMessage(text, false);
+                                } else {
+                                        System.out.println(
+                                                        "Message not displayed: sender=" + sender
+                                                                        + ", selectedUser=" + selectedUser);
                                 }
 
                                 break;
@@ -757,22 +743,15 @@ public class LoginScreen extends Application {
                         case "STATUS":
 
                                 if (parts.length >= 2) {
-
-                                        showStatusMessage(
-                                                        parts[1]);
+                                        showStatusMessage(parts[1]);
                                 }
-
                                 break;
 
                         case "ERROR":
 
                                 if (parts.length >= 2) {
-
-                                        showAlert(
-                                                        "Server Error",
-                                                        parts[1]);
+                                        showAlert("Server Error", parts[1]);
                                 }
-
                                 break;
 
                         case "LOGIN_OK":
@@ -781,14 +760,10 @@ public class LoginScreen extends Application {
                                                 parts.length >= 2
                                                                 ? parts[1]
                                                                 : "Login successful.");
-
                                 break;
 
                         default:
-
-                                System.out.println(
-                                                "Unknown server message: "
-                                                                + message);
+                                System.out.println("Unknown server message: " + message);
                 }
         }
 
