@@ -1,0 +1,92 @@
+
+@echo off
+setlocal
+title EchoLoop Launcher
+
+cd /d "%~dp0"
+
+REM JavaFX SDK location
+set "JAVAFX_LIB=C:\Users\kumar\Downloads\openjfx-27_windows-x64_bin-sdk\javafx-sdk-27\lib"
+
+REM MySQL connector
+set "MYSQL_JAR=lib\mysql-connector-j-26.7.0.jar"
+
+
+
+
+REM Check Java
+where java >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Java is not installed or not in PATH.
+    pause
+    exit /b 1
+)
+
+where javac >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: javac is not available.
+    echo Make sure your JDK bin folder is in PATH.
+    pause
+    exit /b 1
+)
+
+REM Check JavaFX SDK
+if not exist "%JAVAFX_LIB%\javafx.controls.jar" (
+    echo ERROR: JavaFX SDK not found:
+    echo %JAVAFX_LIB%
+    pause
+    exit /b 1
+)
+
+REM Check MySQL connector
+if not exist "%MYSQL_JAR%" (
+    echo ERROR: MySQL connector not found:
+    echo %MYSQL_JAR%
+    pause
+    exit /b 1
+)
+
+REM Check database configuration
+if not exist "database.properties" (
+    echo ERROR: database.properties was not found.
+    pause
+    exit /b 1
+)
+
+echo [1/3] Compiling EchoLoop...
+
+javac -cp ".;%MYSQL_JAR%" --module-path "%JAVAFX_LIB%" --add-modules javafx.controls ChatServer.java ClientHandler.java DatabaseConnection.java UserService.java MessageService.java ChatClient.java LoginScreen.java
+
+if errorlevel 1 (
+    echo.
+    echo ERROR: Compilation failed.
+    pause
+    exit /b 1
+)
+
+echo.
+echo [2/3] Checking ChatServer on port 5000...
+
+netstat -ano | findstr ":5000" | findstr "LISTENING" >nul 2>&1
+
+if errorlevel 1 (
+    echo Starting ChatServer...
+    start "EchoLoop Server" /D "%CD%" cmd /k "java -cp .;%MYSQL_JAR% ChatServer"
+    timeout /t 2 /nobreak >nul
+) else (
+    echo A process is already listening on port 5000.
+    echo Reusing the existing server.
+)
+
+echo.
+echo [3/3] Launching EchoLoop...
+
+java -cp ".;%MYSQL_JAR%" --module-path "%JAVAFX_LIB%" --add-modules javafx.controls LoginScreen
+
+if errorlevel 1 (
+    echo.
+    echo EchoLoop exited with an error.
+    pause
+)
+
+endlocal
