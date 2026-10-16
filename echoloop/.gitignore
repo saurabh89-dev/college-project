@@ -1,4 +1,18 @@
+# Build output and Java compiler artifacts
+target/
 *.class
-*.log
+
+# Local tooling and dependency caches
+.m2/
 .vscode/
+.idea/
+out/
+build/
+
+# Local runtime files
+*.log
+*.pid
+
+# Legacy local configuration and preserved Git backup
 database.properties
+.git-backup/
