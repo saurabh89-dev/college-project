@@ -13,6 +13,4 @@ build/
 *.log
 *.pid
 
-# Legacy local configuration and preserved Git backup
-database.properties
-.git-backup/
+

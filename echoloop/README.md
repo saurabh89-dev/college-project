@@ -19,4 +19,4 @@ College project: a Java real-time chat application with MySQL.
 - `src/main/resources/application.properties` - application and database configuration
 - `src/main/resources/schema.sql` - additive database migration
 - `database/schema.sql` - initial MySQL schema
-- `docs/CLEANUP_REPORT.md` - project cleanup record
+
