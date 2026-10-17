@@ -10,7 +10,7 @@ import org.springframework.messaging.simp.*;
 import org.springframework.messaging.simp.config.*;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.crypto.bcrypt.*;
-import org.springframework.stereotype.*;
+// import org.springframework.stereotype.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.*;
 import org.springframework.web.socket.*;
@@ -38,8 +38,7 @@ public class EchoLoopApplication {
 @EnableWebSocketMessageBroker
 class Ws implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry r) {
-        // /user is the client-facing destination prefix. Spring resolves it to
-        // a session-specific /queue destination before the broker delivers it.
+
         r.enableSimpleBroker("/queue");
     }
 
@@ -194,8 +193,7 @@ class Api {
     @org.springframework.transaction.annotation.Transactional
     Object deleteAccount(HttpServletRequest r) {
         int userId = me(r);
-        // Removing a conversation lets MySQL cascade to its messages and AI analysis.
-        // This keeps no orphaned private data when its participant is removed.
+
         db.update("delete from ai_analysis where requested_by=?", userId);
         db.update("delete from conversations where user_one_id=? or user_two_id=?", userId, userId);
         db.update("delete from users where id=?", userId);
@@ -266,9 +264,11 @@ class Api {
 
     @DeleteMapping("/conversations/{c}/messages")
     Object clearChat(@PathVariable int c, HttpServletRequest r) {
-        // Membership above ensures this affects only the currently authorized private chat.
+
         member(c, me(r));
-        db.update("update messages set deleted_at=current_timestamp,message_text='' where conversation_id=? and deleted_at is null", c);
+        db.update(
+                "update messages set deleted_at=current_timestamp,message_text='' where conversation_id=? and deleted_at is null",
+                c);
         event(c, "chat-cleared", Map.of("conversationId", c));
         return Map.of("conversationId", c, "cleared", true);
     }
@@ -314,7 +314,8 @@ class Api {
                 .anyMatch(m -> ((Number) m.get("sender_id")).intValue() != me(r)))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can delete only your own available messages.");
 
-        db.update("update messages set deleted_at=current_timestamp,message_text='' where id in(" + marks + ")", ids.toArray());
+        db.update("update messages set deleted_at=current_timestamp,message_text='' where id in(" + marks + ")",
+                ids.toArray());
         messages.stream().map(m -> ((Number) m.get("conversation_id")).intValue()).distinct()
                 .forEach(c -> event(c, "messages-deleted", Map.of("messageIds", ids, "conversationId", c)));
         return Map.of("deletedIds", ids);

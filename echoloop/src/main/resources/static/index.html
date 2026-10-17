@@ -1,668 +1,1083 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>EchoLoop</title>
     <style>
-        :root {
-            --a: #6759e8;
-            --as: #eeecff;
-            --ink: #202333;
-            --muted: #7b8092;
-            --line: #e8e9f0;
-            --side: #202333;
-            --danger: #d92d46
+      :root {
+        --a: #6759e8;
+        --as: #eeecff;
+        --ink: #202333;
+        --muted: #7b8092;
+        --line: #e8e9f0;
+        --side: #202333;
+        --danger: #d92d46;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body,
+      #root {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        background: #f6f7fb;
+        color: var(--ink);
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+        border-radius: 9px;
+        cursor: pointer;
+        font-weight: 650;
+      }
+
+      button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #a9a3ff;
+        outline-offset: 2px;
+      }
+
+      .auth {
+        width: min(390px, 92vw);
+        margin: 10vh auto;
+        padding: 28px;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 12px 35px #1e20351a;
+      }
+
+      .auth h1 {
+        margin: 0;
+        color: var(--a);
+      }
+
+      .auth p {
+        color: var(--muted);
+      }
+
+      input {
+        width: 100%;
+        border: 1px solid #dfe1ea;
+        border-radius: 9px;
+        padding: 11px 12px;
+      }
+
+      .auth input {
+        margin: 9px 0;
+      }
+
+      .primary {
+        background: var(--a);
+        color: #fff;
+        padding: 11px 14px;
+      }
+
+      .full {
+        width: 100%;
+      }
+
+      .link {
+        width: 100%;
+        background: transparent;
+        color: var(--a);
+        padding: 10px;
+      }
+
+      .error {
+        min-height: 20px;
+        margin: 7px 0;
+        color: #b42318;
+        font-size: 13px;
+      }
+
+      .app {
+        height: 100%;
+        display: grid;
+        grid-template-columns: 310px minmax(0, 1fr);
+        overflow: hidden;
+      }
+
+      .side {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 18px 14px;
+        background: var(--side);
+        color: #fff;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 5px;
+        font-size: 21px;
+        font-weight: 800;
+      }
+
+      .brand-mark,
+      .avatar {
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+        font-weight: 800;
+      }
+
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        background: var(--a);
+        box-shadow: 0 6px 18px #0004;
+      }
+
+      .profile-wrap {
+        position: relative;
+      }
+
+      .profile {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px;
+        background: #2c3045;
+        color: #fff;
+        text-align: left;
+        transition: 0.18s;
+      }
+
+      .profile:hover {
+        background: #363a53;
+        transform: translateY(-1px);
+      }
+
+      .avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #e7e5ff;
+        color: #4f46c9;
+      }
+
+      .profile-copy {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .profile-name,
+      .profile-email {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .profile-name {
+        font-weight: 750;
+      }
+
+      .profile-email {
+        color: #afb5d0;
+        font-size: 12px;
+      }
+
+      .menu {
+        position: absolute;
+        z-index: 5;
+        top: calc(100% + 7px);
+        left: 0;
+        right: 0;
+        display: none;
+        padding: 6px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 10px 28px #1719272e;
+      }
+
+      .menu.open {
+        display: block;
+        animation: in 0.15s ease;
+      }
+
+      .menu button {
+        width: 100%;
+        padding: 10px;
+        color: var(--ink);
+        background: transparent;
+        text-align: left;
+      }
+
+      .menu button:hover {
+        background: #f3f3f8;
+      }
+
+      .menu .danger {
+        color: var(--danger);
+      }
+
+      .users-title {
+        margin: 2px 7px -7px;
+        color: #aeb4cf;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+      }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 4px;
+      }
+
+      .search span {
+        color: #aeb4cf;
+      }
+
+      .search input {
+        min-width: 0;
+        border: 1px solid #41465e;
+        background: #2c3045;
+        color: #fff;
+      }
+
+      .search input::placeholder {
+        color: #aeb4cf;
+      }
+
+      .clear-search {
+        display: none;
+        padding: 4px 7px;
+        background: transparent;
+        color: #c7cbdd;
+      }
+
+      .clear-search.visible {
+        display: block;
+      }
+
+      #userList {
+        min-height: 0;
+        flex: 1;
+        overflow: auto;
+        padding: 0 3px;
+      }
+
+      .empty-list {
+        padding: 22px 10px;
+        color: #aeb4cf;
+        text-align: center;
+      }
+
+      .user {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px;
+        margin: 4px 0;
+        color: #fff;
+        background: transparent;
+        text-align: left;
+        transition: 0.18s;
+      }
+
+      .user:hover {
+        background: #2c3045;
+        transform: translateX(2px);
+      }
+
+      .user.active {
+        background: #3b3670;
+        box-shadow: inset 3px 0 #a6a1ff;
+      }
+
+      .user-main {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .presence {
+        width: 8px;
+        height: 8px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: #737991;
+      }
+
+      .presence.online {
+        background: #42c985;
+        box-shadow: 0 0 0 3px #42c98525;
+      }
+
+      .user-copy {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .user-name,
+      .preview {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .user-name {
+        font-weight: 700;
+      }
+
+      .preview {
+        color: #abb1ca;
+        font-size: 12px;
+      }
+
+      .user-meta {
+        align-self: flex-start;
+        color: #aeb4cf;
+        font-size: 11px;
+      }
+
+      .badge {
+        display: none;
+        min-width: 20px;
+        padding: 2px 6px;
+        border-radius: 99px;
+        background: #f05269;
+        color: #fff;
+        font-size: 11px;
+        text-align: center;
+      }
+
+      .badge.visible {
+        display: block;
+      }
+
+      .main {
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        background: #f6f7fb;
+      }
+
+      .head {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 15px 20px;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .chat-title {
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .chat-status {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .toolbar {
+        padding: 8px 10px;
+        background: #f1f1f6;
+        color: #46495c;
+        font-size: 13px;
+      }
+
+      .toolbar:hover {
+        background: #e5e4f6;
+      }
+
+      .clear-chat {
+        color: var(--danger);
+        background: #fff0f2;
+      }
+
+      .selection {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 9px 20px;
+        color: #454065;
+        background: #eeecff;
+        border-bottom: 1px solid #ddd9ff;
+      }
+
+      .selection[hidden] {
+        display: none;
+      }
+
+      .selection-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .selection-actions .danger {
+        background: var(--danger);
+        color: #fff;
+      }
+
+      .messages {
+        min-height: 0;
+        flex: 1 1 auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 20px clamp(14px, 4vw, 48px);
+        scroll-behavior: smooth;
+      }
+
+      .empty-chat {
+        height: 100%;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .empty-chat strong {
+        display: block;
+        color: var(--ink);
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .msg {
+        max-width: min(74%, 640px);
+        margin: 10px 0;
+        animation: in 0.18s ease;
+      }
+
+      .msg.mine {
+        margin-left: auto;
+      }
+
+      .msg-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 7px;
+      }
+
+      .mine .msg-row {
+        justify-content: flex-end;
+      }
+
+      .bubble {
+        display: inline-block;
+        max-width: 100%;
+        padding: 10px 12px;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+        border-radius: 14px 14px 14px 4px;
+        background: #fff;
+        box-shadow: 0 1px 2px #1f21310c;
+      }
+
+      .mine .bubble {
+        border-radius: 14px 14px 4px 14px;
+        background: var(--a);
+        color: #fff;
+      }
+
+      .message-time {
+        display: block;
+        margin: 3px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .mine .message-time {
+        text-align: right;
+      }
+
+      .message-check {
+        display: none;
+        width: 17px;
+        height: 17px;
+        accent-color: var(--a);
+      }
+
+      .selecting .mine .message-check {
+        display: block;
+      }
+
+      .msg.selected .bubble {
+        outline: 2px solid #8c85f6;
+        outline-offset: 2px;
+      }
+
+      .compose {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 9px;
+        padding: 14px 20px;
+        border-top: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .compose input {
+        min-width: 0;
+      }
+
+      .compose input:disabled {
+        background: #f5f5f7;
+      }
+
+      .compose button {
+        min-width: 78px;
+      }
+
+      .compose button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      @keyframes in {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
         }
 
-        * {
-            box-sizing: border-box
+        to {
+          opacity: 1;
+          transform: none;
         }
+      }
 
-        html,
-        body,
-        #root {
-            height: 100%;
-            margin: 0;
-            overflow: hidden
-        }
-
-        body {
-            background: #f6f7fb;
-            color: var(--ink);
-            font: 14px/1.4 system-ui, sans-serif
-        }
-
-        button,
-        input {
-            font: inherit
-        }
-
-        button {
-            border: 0;
-            border-radius: 9px;
-            cursor: pointer;
-            font-weight: 650
-        }
-
-        button:focus-visible,
-        input:focus-visible {
-            outline: 3px solid #a9a3ff;
-            outline-offset: 2px
-        }
-
-        .auth {
-            width: min(390px, 92vw);
-            margin: 10vh auto;
-            padding: 28px;
-            border-radius: 18px;
-            background: #fff;
-            box-shadow: 0 12px 35px #1e20351a
-        }
-
-        .auth h1 {
-            margin: 0;
-            color: var(--a)
-        }
-
-        .auth p {
-            color: var(--muted)
-        }
-
-        input {
-            width: 100%;
-            border: 1px solid #dfe1ea;
-            border-radius: 9px;
-            padding: 11px 12px
-        }
-
-        .auth input {
-            margin: 9px 0
-        }
-
-        .primary {
-            background: var(--a);
-            color: #fff;
-            padding: 11px 14px
-        }
-
-        .full {
-            width: 100%
-        }
-
-        .link {
-            width: 100%;
-            background: transparent;
-            color: var(--a);
-            padding: 10px
-        }
-
-        .error {
-            min-height: 20px;
-            margin: 7px 0;
-            color: #b42318;
-            font-size: 13px
-        }
-
+      @media (max-width: 700px) {
         .app {
-            height: 100%;
-            display: grid;
-            grid-template-columns: 310px minmax(0, 1fr);
-            overflow: hidden
+          grid-template-columns: 112px minmax(0, 1fr);
         }
 
         .side {
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            padding: 18px 14px;
-            background: var(--side);
-            color: #fff
+          padding: 12px 7px;
         }
 
         .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 0 5px;
-            font-size: 21px;
-            font-weight: 800
+          font-size: 0;
+          justify-content: center;
         }
 
-        .brand-mark,
-        .avatar {
-            display: grid;
-            place-items: center;
-            flex: 0 0 auto;
-            font-weight: 800
-        }
-
-        .brand-mark {
-            width: 34px;
-            height: 34px;
-            border-radius: 11px;
-            background: var(--a);
-            box-shadow: 0 6px 18px #0004
-        }
-
-        .profile-wrap {
-            position: relative
+        .profile-copy,
+        .users-title,
+        .search span,
+        .search input,
+        .clear-search,
+        .preview,
+        .user-meta {
+          display: none !important;
         }
 
         .profile {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 11px;
-            background: #2c3045;
-            color: #fff;
-            text-align: left;
-            transition: .18s
-        }
-
-        .profile:hover {
-            background: #363a53;
-            transform: translateY(-1px)
-        }
-
-        .avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: #e7e5ff;
-            color: #4f46c9
-        }
-
-        .profile-copy {
-            min-width: 0;
-            flex: 1
-        }
-
-        .profile-name,
-        .profile-email {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap
-        }
-
-        .profile-name {
-            font-weight: 750
-        }
-
-        .profile-email {
-            color: #afb5d0;
-            font-size: 12px
-        }
-
-        .menu {
-            position: absolute;
-            z-index: 5;
-            top: calc(100% + 7px);
-            left: 0;
-            right: 0;
-            display: none;
-            padding: 6px;
-            border-radius: 10px;
-            background: #fff;
-            box-shadow: 0 10px 28px #1719272e
-        }
-
-        .menu.open {
-            display: block;
-            animation: in .15s ease
-        }
-
-        .menu button {
-            width: 100%;
-            padding: 10px;
-            color: var(--ink);
-            background: transparent;
-            text-align: left
-        }
-
-        .menu button:hover {
-            background: #f3f3f8
-        }
-
-        .menu .danger {
-            color: var(--danger)
-        }
-
-        .users-title {
-            margin: 2px 7px -7px;
-            color: #aeb4cf;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: .09em
-        }
-
-        .search {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 0 4px
-        }
-
-        .search span {
-            color: #aeb4cf
-        }
-
-        .search input {
-            min-width: 0;
-            border: 1px solid #41465e;
-            background: #2c3045;
-            color: #fff
-        }
-
-        .search input::placeholder {
-            color: #aeb4cf
-        }
-
-        .clear-search {
-            display: none;
-            padding: 4px 7px;
-            background: transparent;
-            color: #c7cbdd
-        }
-
-        .clear-search.visible {
-            display: block
-        }
-
-        #userList {
-            min-height: 0;
-            flex: 1;
-            overflow: auto;
-            padding: 0 3px
-        }
-
-        .empty-list {
-            padding: 22px 10px;
-            color: #aeb4cf;
-            text-align: center
+          justify-content: center;
+          padding: 8px;
         }
 
         .user {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            padding: 10px;
-            margin: 4px 0;
-            color: #fff;
-            background: transparent;
-            text-align: left;
-            transition: .18s
-        }
-
-        .user:hover {
-            background: #2c3045;
-            transform: translateX(2px)
-        }
-
-        .user.active {
-            background: #3b3670;
-            box-shadow: inset 3px 0 #a6a1ff
+          justify-content: center;
+          padding: 11px 5px;
         }
 
         .user-main {
-            min-width: 0;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 9px
-        }
-
-        .presence {
-            width: 8px;
-            height: 8px;
-            flex: 0 0 auto;
-            border-radius: 50%;
-            background: #737991
-        }
-
-        .presence.online {
-            background: #42c985;
-            box-shadow: 0 0 0 3px #42c98525
-        }
-
-        .user-copy {
-            min-width: 0;
-            flex: 1
-        }
-
-        .user-name,
-        .preview {
-            display: block;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap
+          flex: none;
         }
 
         .user-name {
-            font-weight: 700
-        }
-
-        .preview {
-            color: #abb1ca;
-            font-size: 12px
-        }
-
-        .user-meta {
-            align-self: flex-start;
-            color: #aeb4cf;
-            font-size: 11px
-        }
-
-        .badge {
-            display: none;
-            min-width: 20px;
-            padding: 2px 6px;
-            border-radius: 99px;
-            background: #f05269;
-            color: #fff;
-            font-size: 11px;
-            text-align: center
-        }
-
-        .badge.visible {
-            display: block
-        }
-
-        .main {
-            min-width: 0;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-            background: #f6f7fb
+          max-width: 45px;
         }
 
         .head {
-            flex: 0 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 15px 20px;
-            background: #fff;
-            border-bottom: 1px solid var(--line)
+          padding: 13px;
         }
 
-        .chat-title {
-            font-size: 16px;
-            font-weight: 800
+        .actions button {
+          font-size: 0;
+          padding: 9px;
         }
 
-        .chat-status {
-            color: var(--muted);
-            font-size: 12px
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px
-        }
-
-        .toolbar {
-            padding: 8px 10px;
-            background: #f1f1f6;
-            color: #46495c;
-            font-size: 13px
-        }
-
-        .toolbar:hover {
-            background: #e5e4f6
-        }
-
-        .clear-chat {
-            color: var(--danger);
-            background: #fff0f2
-        }
-
-        .selection {
-            flex: 0 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 9px 20px;
-            color: #454065;
-            background: #eeecff;
-            border-bottom: 1px solid #ddd9ff
-        }
-
-        .selection[hidden] {
-            display: none
-        }
-
-        .selection-actions {
-            display: flex;
-            gap: 8px
-        }
-
-        .selection-actions .danger {
-            background: var(--danger);
-            color: #fff
+        .actions button::first-letter {
+          font-size: 13px;
         }
 
         .messages {
-            min-height: 0;
-            flex: 1 1 auto;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 20px clamp(14px, 4vw, 48px);
-            scroll-behavior: smooth
-        }
-
-        .empty-chat {
-            height: 100%;
-            display: grid;
-            place-items: center;
-            color: var(--muted);
-            text-align: center
-        }
-
-        .empty-chat strong {
-            display: block;
-            color: var(--ink);
-            font-size: 16px;
-            margin-bottom: 4px
-        }
-
-        .msg {
-            max-width: min(74%, 640px);
-            margin: 10px 0;
-            animation: in .18s ease
-        }
-
-        .msg.mine {
-            margin-left: auto
-        }
-
-        .msg-row {
-            display: flex;
-            align-items: flex-end;
-            gap: 7px
-        }
-
-        .mine .msg-row {
-            justify-content: flex-end
-        }
-
-        .bubble {
-            display: inline-block;
-            max-width: 100%;
-            padding: 10px 12px;
-            overflow-wrap: anywhere;
-            white-space: pre-wrap;
-            border-radius: 14px 14px 14px 4px;
-            background: #fff;
-            box-shadow: 0 1px 2px #1f21310c
-        }
-
-        .mine .bubble {
-            border-radius: 14px 14px 4px 14px;
-            background: var(--a);
-            color: #fff
-        }
-
-        .message-time {
-            display: block;
-            margin: 3px;
-            color: var(--muted);
-            font-size: 11px
-        }
-
-        .mine .message-time {
-            text-align: right
-        }
-
-        .message-check {
-            display: none;
-            width: 17px;
-            height: 17px;
-            accent-color: var(--a)
-        }
-
-        .selecting .mine .message-check {
-            display: block
-        }
-
-        .msg.selected .bubble {
-            outline: 2px solid #8c85f6;
-            outline-offset: 2px
+          padding: 14px;
         }
 
         .compose {
-            flex: 0 0 auto;
-            display: flex;
-            gap: 9px;
-            padding: 14px 20px;
-            border-top: 1px solid var(--line);
-            background: #fff
+          padding: 10px;
         }
 
-        .compose input {
-            min-width: 0
+        .msg {
+          max-width: 88%;
         }
-
-        .compose input:disabled {
-            background: #f5f5f7
-        }
-
-        .compose button {
-            min-width: 78px
-        }
-
-        .compose button:disabled {
-            opacity: .55;
-            cursor: not-allowed
-        }
-
-        @keyframes in {
-            from {
-                opacity: 0;
-                transform: translateY(4px)
-            }
-
-            to {
-                opacity: 1;
-                transform: none
-            }
-        }
-
-        @media(max-width:700px) {
-            .app {
-                grid-template-columns: 112px minmax(0, 1fr)
-            }
-
-            .side {
-                padding: 12px 7px
-            }
-
-            .brand {
-                font-size: 0;
-                justify-content: center
-            }
-
-            .profile-copy,
-            .users-title,
-            .search span,
-            .search input,
-            .clear-search,
-            .preview,
-            .user-meta {
-                display: none !important
-            }
-
-            .profile {
-                justify-content: center;
-                padding: 8px
-            }
-
-            .user {
-                justify-content: center;
-                padding: 11px 5px
-            }
-
-            .user-main {
-                flex: none
-            }
-
-            .user-name {
-                max-width: 45px
-            }
-
-            .head {
-                padding: 13px
-            }
-
-            .actions button {
-                font-size: 0;
-                padding: 9px
-            }
-
-            .actions button::first-letter {
-                font-size: 13px
-            }
-
-            .messages {
-                padding: 14px
-            }
-
-            .compose {
-                padding: 10px
-            }
-
-            .msg {
-                max-width: 88%
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="root"></div>
     <script>
-        const root = document.getElementById("root"); let me = null, activeConversationId = null, activeUserId = null, socket = null, socketRetry = null, userRefreshTimer = null; const usersById = new Map(), unreadCounts = new Map(), renderedMessageIds = new Set(), selectedMessageIds = new Set();
-        async function api(path, options = {}) { const res = await fetch("/api" + path, { credentials: "same-origin", headers: { "Content-Type": "application/json" }, ...options }), raw = await res.text(); let body = {}; try { body = raw ? JSON.parse(raw) : {} } catch { body = { detail: raw } } if (!res.ok) throw new Error(body.detail || body.message || `Request failed (${res.status})`); return body }
-        function auth(register = false) { root.innerHTML = register ? `<form class="auth" id="form"><h1>Create account</h1><p>Join the EchoLoop conversation.</p><input id="newUsername" placeholder="Username: 3–30 letters, numbers, or _" required><input id="newEmail" type="email" placeholder="Email address" required><input id="newPassword" type="password" minlength="8" placeholder="Password: at least 8 characters" required><input id="confirmPassword" type="password" placeholder="Confirm password" required><div class="error" id="error"></div><button class="primary full">Create account</button><button type="button" class="link" id="switchAuth">Back to login</button></form>` : `<form class="auth" id="form"><h1>EchoLoop</h1><p>Connect. Chat. Understand.</p><input id="loginName" placeholder="Username or email" required><input id="loginPassword" type="password" placeholder="Password" required><div class="error" id="error"></div><button class="primary full">Login</button><button type="button" class="link" id="switchAuth">New user? Create an account</button></form>`; document.getElementById("switchAuth").onclick = () => auth(!register); form.onsubmit = async e => { e.preventDefault(); error.textContent = ""; try { if (register) { if (newPassword.value !== confirmPassword.value) throw new Error("Passwords do not match."); me = await api("/auth/register", { method: "POST", body: JSON.stringify({ username: newUsername.value.trim(), email: newEmail.value.trim(), password: newPassword.value, passwordConfirmation: confirmPassword.value }) }) } else me = await api("/auth/login", { method: "POST", body: JSON.stringify({ login: loginName.value.trim(), password: loginPassword.value }) }); showApp() } catch (x) { error.textContent = x.message } } }
-        async function showApp() { setUsers(await api("/users")); root.innerHTML = `<div class="app"><aside class="side"><div class="brand"><span class="brand-mark">∞</span><span>EchoLoop</span></div><div class="profile-wrap"><button class="profile" id="profileButton"><span class="avatar" id="myAvatar"></span><span class="profile-copy"><span class="profile-name" id="myName"></span><span class="profile-email" id="myEmail"></span></span></button><div class="menu" id="profileMenu"><button id="logoutButton">Log out</button><button class="danger" id="deleteAccountButton">Delete account</button></div></div><div class="users-title">PEOPLE</div><label class="search"><span>⌕</span><input id="userSearch" type="search" placeholder="Search chats" aria-label="Search chats"><button type="button" class="clear-search" id="clearSearch" aria-label="Clear search">×</button></label><div id="userList"></div></aside><main class="main"><header class="head"><div><div class="chat-title" id="chatTitle">Select a conversation</div><div class="chat-status" id="chatStatus">Choose someone from your chat list</div></div><div class="actions"><button class="toolbar" id="selectButton" hidden>Select messages</button><button class="toolbar clear-chat" id="clearButton" hidden>Clear chat</button></div></header><div class="selection" id="selection" hidden><span id="selectionCount">0 selected</span><div class="selection-actions"><button class="toolbar" id="cancelButton">Cancel</button><button class="toolbar danger" id="deleteButton" disabled>Delete selected</button></div></div><section class="messages" id="messages"><div class="empty-chat"><div><strong>Your conversations live here</strong>Choose a person to view messages.</div></div></section><form class="compose" id="messageForm"><input id="messageText" placeholder="Write a message" disabled autocomplete="off"><button class="primary" id="sendButton" disabled>Send</button></form></main></div>`; myAvatar.textContent = initials(me.username); myName.textContent = me.username; myEmail.textContent = me.email || "Your EchoLoop profile"; profileButton.onclick = () => profileMenu.classList.toggle("open"); logoutButton.onclick = logout; deleteAccountButton.onclick = deleteAccount; userSearch.oninput = () => { clearSearch.classList.toggle("visible", Boolean(userSearch.value)); renderUsers() }; clearSearch.onclick = () => { userSearch.value = ""; clearSearch.classList.remove("visible"); renderUsers(); userSearch.focus() }; selectButton.onclick = () => selectMode(true); cancelButton.onclick = () => selectMode(false); deleteButton.onclick = deleteSelected; clearButton.onclick = clearChat; messageForm.onsubmit = send; renderUsers(); connect(); presenceRefresh() }
-        function setUsers(users) { usersById.clear(); users.forEach(x => usersById.set(x.id, x)) }
-        function renderUsers() { const list = document.getElementById("userList"); if (!list) return; const q = (userSearch.value || "").trim().toLowerCase(), users = [...usersById.values()].filter(u => u.username.toLowerCase().includes(q) || (u.lastMessage || "").toLowerCase().includes(q)); list.innerHTML = users.length ? users.map(u => `<button class="user ${u.id === activeUserId ? "active" : ""}" data-id="${u.id}"><span class="user-main"><span class="presence ${u.online ? "online" : ""}"></span><span class="user-copy"><span class="user-name">${escapeHtml(u.username)}</span><span class="preview">${escapeHtml(u.lastMessage || "No messages yet")}</span></span></span><span class="user-meta">${shortTime(u.lastMessageAt)}</span><span class="badge"></span></button>`).join("") : `<div class="empty-list">No chats match your search.</div>`; list.querySelectorAll(".user").forEach(b => b.onclick = () => openConversation(usersById.get(Number(b.dataset.id)))); badges() }
-        async function openConversation(user) { try { const c = await api("/conversations", { method: "POST", body: JSON.stringify({ userId: user.id }) }); activeConversationId = c.id; activeUserId = user.id; unreadCounts.delete(user.id); renderUsers(); chatTitle.textContent = user.username; updateStatus(); messageText.disabled = false; sendButton.disabled = false; selectButton.hidden = false; clearButton.hidden = false; selectMode(false); renderMessages(await api(`/conversations/${c.id}/messages`), true) } catch (e) { alert(e.message) } }
-        function updateStatus() { const u = usersById.get(activeUserId); chatStatus.textContent = u ? (u.online ? "● Online" : "● Offline") : "Choose someone from your chat list" } function badges() { document.querySelectorAll(".user").forEach(b => { const n = unreadCounts.get(Number(b.dataset.id)) || 0, x = b.querySelector(".badge"); x.textContent = n > 99 ? "99+" : n; x.classList.toggle("visible", n > 0) }) }
-        async function logout() { try { await api("/auth/logout", { method: "POST" }); teardown(); auth() } catch (e) { alert(e.message) } } async function deleteAccount() { if (!confirm("Delete your account permanently? This removes your private conversations and messages and cannot be undone.")) return; deleteAccountButton.disabled = true; try { await api("/auth/account", { method: "DELETE" }); teardown(); auth() } catch (e) { alert(e.message); deleteAccountButton.disabled = false } }
-        function teardown() { disconnect(); if (userRefreshTimer) clearInterval(userRefreshTimer); activeConversationId = activeUserId = null; unreadCounts.clear(); selectedMessageIds.clear() } function presenceRefresh() { clearInterval(userRefreshTimer); userRefreshTimer = setInterval(refreshUsers, 8000) } async function refreshUsers() { try { setUsers(await api("/users")); renderUsers(); updateStatus() } catch (e) { console.warn(e) } }
-        function connect() { disconnect(); const p = location.protocol === "https:" ? "wss:" : "ws:"; socket = new WebSocket(`${p}//${location.host}/ws`); socket.onopen = () => socket.send(`CONNECT\naccept-version:1.2\nhost:${location.host}\n\n\0`); socket.onmessage = e => String(e.data).split("\0").forEach(frame); socket.onclose = () => { socket = null; if (me && !socketRetry) socketRetry = setTimeout(() => { socketRetry = null; connect() }, 2000) } } function disconnect() { if (socketRetry) clearTimeout(socketRetry); socketRetry = null; if (socket) { socket.onclose = null; socket.close(); socket = null } } function frame(f) { const d = f.indexOf("\n\n"), cmd = f.slice(0, f.indexOf("\n")); if (d < 0) return; if (cmd === "CONNECTED") { socket.send("SUBSCRIBE\nid:events\ndestination:/user/queue/events\nack:auto\n\n\0"); return } if (cmd !== "MESSAGE") return; try { event(JSON.parse(f.slice(d + 2))) } catch (e) { console.warn(e) } }
-        function event(e) { const p = e.payload; if (!p) return; if (e.type === "message") { if (p.conversationId === activeConversationId) append(p); else if (p.senderId !== me.id) { const u = usersById.get(p.senderId); if (u) { unreadCounts.set(u.id, (unreadCounts.get(u.id) || 0) + 1); badges() } } } else if (p.conversationId === activeConversationId) refreshChat(); refreshUsers() } async function refreshChat() { if (!activeConversationId) return; try { renderMessages(await api(`/conversations/${activeConversationId}/messages`), false) } catch (e) { console.warn(e) } }
-        function bottom() { return messages.scrollHeight - messages.scrollTop - messages.clientHeight < 48 } function renderMessages(list, scroll) { renderedMessageIds.clear(); if (!list.length) { messages.innerHTML = `<div class="empty-chat"><div><strong>No messages yet</strong>Say hello to start the conversation.</div></div>`; return } messages.innerHTML = list.map(markup).join(""); list.forEach(m => renderedMessageIds.add(m.id)); bindChecks(); if (scroll) messages.scrollTop = messages.scrollHeight } function append(m) { if (renderedMessageIds.has(m.id)) return; const stick = bottom(); if (messages.querySelector(".empty-chat")) messages.innerHTML = ""; const h = document.createElement("div"); h.innerHTML = markup(m); messages.append(h.firstElementChild); renderedMessageIds.add(m.id); bindChecks(messages.lastElementChild); if (stick) messages.scrollTop = messages.scrollHeight } function markup(m) { const mine = m.senderId === me.id; return `<article class="msg ${mine ? "mine" : ""}" data-id="${m.id}"><div class="msg-row">${mine ? '<input class="message-check" type="checkbox" aria-label="Select this message">' : ""}<span class="bubble">${escapeHtml(m.text)}</span></div><time class="message-time">${fullTime(m.sentAt)}${m.editedAt ? " · edited" : ""}</time></article>` } function bindChecks(scope = document) { [...(scope.matches?.(".message-check") ? [scope] : []), ...(scope.querySelectorAll?.(".message-check") || [])].forEach(c => c.onchange = () => { const id = Number(c.closest(".msg").dataset.id); c.checked ? selectedMessageIds.add(id) : selectedMessageIds.delete(id); c.closest(".msg").classList.toggle("selected", c.checked); selectionCount.textContent = `${selectedMessageIds.size} selected`; deleteButton.disabled = !selectedMessageIds.size }) }
-        function selectMode(on) { selectedMessageIds.clear(); messages.classList.toggle("selecting", on); selection.hidden = !on; selectButton.hidden = on || !activeConversationId; document.querySelectorAll(".message-check").forEach(c => { c.checked = false; c.closest(".msg").classList.remove("selected") }); selectionCount.textContent = "0 selected"; deleteButton.disabled = true } async function deleteSelected() { const ids = [...selectedMessageIds]; if (!ids.length || !confirm(`Delete ${ids.length} selected message${ids.length === 1 ? "" : "s"} for everyone?`)) return; try { await api("/messages", { method: "DELETE", body: JSON.stringify({ messageIds: ids }) }); selectMode(false); refreshChat() } catch (e) { alert(e.message) } } async function clearChat() { const u = usersById.get(activeUserId); if (!activeConversationId || !confirm(`Clear every message in your conversation with ${u?.username || "this person"}? This cannot be undone for either participant.`)) return; clearButton.disabled = true; try { await api(`/conversations/${activeConversationId}/messages`, { method: "DELETE" }); renderMessages([], false); refreshUsers() } catch (e) { alert(e.message) } finally { clearButton.disabled = false } } async function send(e) { e.preventDefault(); const text = messageText.value.trim(); if (!activeConversationId || !text) return; try { const m = await api(`/conversations/${activeConversationId}/messages`, { method: "POST", body: JSON.stringify({ text }) }); messageText.value = ""; append(m); refreshUsers() } catch (e) { alert(e.message) } }
-        function initials(n) { return String(n).split(/[_\s]+/).map(x => x[0]).join("").slice(0, 2).toUpperCase() } function escapeHtml(t) { return String(t).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])) } function fullTime(v) { return v ? new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(new Date(v)) : "" } function shortTime(v) { if (!v) return ""; const d = new Date(v), now = new Date(); return d.toDateString() === now.toDateString() ? fullTime(v) : new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(d) } auth();
+      const root = document.getElementById("root");
+      let me = null,
+        activeConversationId = null,
+        activeUserId = null,
+        socket = null,
+        socketRetry = null,
+        userRefreshTimer = null;
+      const usersById = new Map(),
+        unreadCounts = new Map(),
+        renderedMessageIds = new Set(),
+        selectedMessageIds = new Set();
+      async function api(path, options = {}) {
+        const res = await fetch("/api" + path, {
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            ...options,
+          }),
+          raw = await res.text();
+        let body = {};
+        try {
+          body = raw ? JSON.parse(raw) : {};
+        } catch {
+          body = { detail: raw };
+        }
+        if (!res.ok)
+          throw new Error(
+            body.detail || body.message || `Request failed (${res.status})`,
+          );
+        return body;
+      }
+      function auth(register = false) {
+        root.innerHTML = register
+          ? `<form class="auth" id="form"><h1>Create account</h1><p>Join the EchoLoop conversation.</p><input id="newUsername" placeholder="Username: 3–30 letters, numbers, or _" required><input id="newEmail" type="email" placeholder="Email address" required><input id="newPassword" type="password" minlength="8" placeholder="Password: at least 8 characters" required><input id="confirmPassword" type="password" placeholder="Confirm password" required><div class="error" id="error"></div><button class="primary full">Create account</button><button type="button" class="link" id="switchAuth">Back to login</button></form>`
+          : `<form class="auth" id="form"><h1>EchoLoop</h1><p>Connect. Chat. Understand.</p><input id="loginName" placeholder="Username or email" required><input id="loginPassword" type="password" placeholder="Password" required><div class="error" id="error"></div><button class="primary full">Login</button><button type="button" class="link" id="switchAuth">New user? Create an account</button></form>`;
+        document.getElementById("switchAuth").onclick = () => auth(!register);
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          error.textContent = "";
+          try {
+            if (register) {
+              if (newPassword.value !== confirmPassword.value)
+                throw new Error("Passwords do not match.");
+              me = await api("/auth/register", {
+                method: "POST",
+                body: JSON.stringify({
+                  username: newUsername.value.trim(),
+                  email: newEmail.value.trim(),
+                  password: newPassword.value,
+                  passwordConfirmation: confirmPassword.value,
+                }),
+              });
+            } else
+              me = await api("/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                  login: loginName.value.trim(),
+                  password: loginPassword.value,
+                }),
+              });
+            showApp();
+          } catch (x) {
+            error.textContent = x.message;
+          }
+        };
+      }
+      async function showApp() {
+        setUsers(await api("/users"));
+        root.innerHTML = `<div class="app"><aside class="side"><div class="brand"><span class="brand-mark">∞</span><span>EchoLoop</span></div><div class="profile-wrap"><button class="profile" id="profileButton"><span class="avatar" id="myAvatar"></span><span class="profile-copy"><span class="profile-name" id="myName"></span><span class="profile-email" id="myEmail"></span></span></button><div class="menu" id="profileMenu"><button id="logoutButton">Log out</button><button class="danger" id="deleteAccountButton">Delete account</button></div></div><div class="users-title">PEOPLE</div><label class="search"><span>⌕</span><input id="userSearch" type="search" placeholder="Search chats" aria-label="Search chats"><button type="button" class="clear-search" id="clearSearch" aria-label="Clear search">×</button></label><div id="userList"></div></aside><main class="main"><header class="head"><div><div class="chat-title" id="chatTitle">Select a conversation</div><div class="chat-status" id="chatStatus">Choose someone from your chat list</div></div><div class="actions"><button class="toolbar" id="selectButton" hidden>Select messages</button><button class="toolbar clear-chat" id="clearButton" hidden>Clear chat</button></div></header><div class="selection" id="selection" hidden><span id="selectionCount">0 selected</span><div class="selection-actions"><button class="toolbar" id="cancelButton">Cancel</button><button class="toolbar danger" id="deleteButton" disabled>Delete selected</button></div></div><section class="messages" id="messages"><div class="empty-chat"><div><strong>Your conversations live here</strong>Choose a person to view messages.</div></div></section><form class="compose" id="messageForm"><input id="messageText" placeholder="Write a message" disabled autocomplete="off"><button class="primary" id="sendButton" disabled>Send</button></form></main></div>`;
+        myAvatar.textContent = initials(me.username);
+        myName.textContent = me.username;
+        myEmail.textContent = me.email || "Your EchoLoop profile";
+        profileButton.onclick = () => profileMenu.classList.toggle("open");
+        logoutButton.onclick = logout;
+        deleteAccountButton.onclick = deleteAccount;
+        userSearch.oninput = () => {
+          clearSearch.classList.toggle("visible", Boolean(userSearch.value));
+          renderUsers();
+        };
+        clearSearch.onclick = () => {
+          userSearch.value = "";
+          clearSearch.classList.remove("visible");
+          renderUsers();
+          userSearch.focus();
+        };
+        selectButton.onclick = () => selectMode(true);
+        cancelButton.onclick = () => selectMode(false);
+        deleteButton.onclick = deleteSelected;
+        clearButton.onclick = clearChat;
+        messageForm.onsubmit = send;
+        renderUsers();
+        connect();
+        presenceRefresh();
+      }
+      function setUsers(users) {
+        usersById.clear();
+        users.forEach((x) => usersById.set(x.id, x));
+      }
+      function renderUsers() {
+        const list = document.getElementById("userList");
+        if (!list) return;
+        const q = (userSearch.value || "").trim().toLowerCase(),
+          users = [...usersById.values()].filter(
+            (u) =>
+              u.username.toLowerCase().includes(q) ||
+              (u.lastMessage || "").toLowerCase().includes(q),
+          );
+        list.innerHTML = users.length
+          ? users
+              .map(
+                (u) =>
+                  `<button class="user ${u.id === activeUserId ? "active" : ""}" data-id="${u.id}"><span class="user-main"><span class="presence ${u.online ? "online" : ""}"></span><span class="user-copy"><span class="user-name">${escapeHtml(u.username)}</span><span class="preview">${escapeHtml(u.lastMessage || "No messages yet")}</span></span></span><span class="user-meta">${shortTime(u.lastMessageAt)}</span><span class="badge"></span></button>`,
+              )
+              .join("")
+          : `<div class="empty-list">No chats match your search.</div>`;
+        list
+          .querySelectorAll(".user")
+          .forEach(
+            (b) =>
+              (b.onclick = () =>
+                openConversation(usersById.get(Number(b.dataset.id)))),
+          );
+        badges();
+      }
+      async function openConversation(user) {
+        try {
+          const c = await api("/conversations", {
+            method: "POST",
+            body: JSON.stringify({ userId: user.id }),
+          });
+          activeConversationId = c.id;
+          activeUserId = user.id;
+          unreadCounts.delete(user.id);
+          renderUsers();
+          chatTitle.textContent = user.username;
+          updateStatus();
+          messageText.disabled = false;
+          sendButton.disabled = false;
+          selectButton.hidden = false;
+          clearButton.hidden = false;
+          selectMode(false);
+          renderMessages(await api(`/conversations/${c.id}/messages`), true);
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+      function updateStatus() {
+        const u = usersById.get(activeUserId);
+        chatStatus.textContent = u
+          ? u.online
+            ? "● Online"
+            : "● Offline"
+          : "Choose someone from your chat list";
+      }
+      function badges() {
+        document.querySelectorAll(".user").forEach((b) => {
+          const n = unreadCounts.get(Number(b.dataset.id)) || 0,
+            x = b.querySelector(".badge");
+          x.textContent = n > 99 ? "99+" : n;
+          x.classList.toggle("visible", n > 0);
+        });
+      }
+      async function logout() {
+        try {
+          await api("/auth/logout", { method: "POST" });
+          teardown();
+          auth();
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+      async function deleteAccount() {
+        if (
+          !confirm(
+            "Delete your account permanently? This removes your private conversations and messages and cannot be undone.",
+          )
+        )
+          return;
+        deleteAccountButton.disabled = true;
+        try {
+          await api("/auth/account", { method: "DELETE" });
+          teardown();
+          auth();
+        } catch (e) {
+          alert(e.message);
+          deleteAccountButton.disabled = false;
+        }
+      }
+      function teardown() {
+        disconnect();
+        if (userRefreshTimer) clearInterval(userRefreshTimer);
+        activeConversationId = activeUserId = null;
+        unreadCounts.clear();
+        selectedMessageIds.clear();
+      }
+      function presenceRefresh() {
+        clearInterval(userRefreshTimer);
+        userRefreshTimer = setInterval(refreshUsers, 8000);
+      }
+      async function refreshUsers() {
+        try {
+          setUsers(await api("/users"));
+          renderUsers();
+          updateStatus();
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+      function connect() {
+        disconnect();
+        const p = location.protocol === "https:" ? "wss:" : "ws:";
+        socket = new WebSocket(`${p}//${location.host}/ws`);
+        socket.onopen = () =>
+          socket.send(
+            `CONNECT\naccept-version:1.2\nhost:${location.host}\n\n\0`,
+          );
+        socket.onmessage = (e) => String(e.data).split("\0").forEach(frame);
+        socket.onclose = () => {
+          socket = null;
+          if (me && !socketRetry)
+            socketRetry = setTimeout(() => {
+              socketRetry = null;
+              connect();
+            }, 2000);
+        };
+      }
+      function disconnect() {
+        if (socketRetry) clearTimeout(socketRetry);
+        socketRetry = null;
+        if (socket) {
+          socket.onclose = null;
+          socket.close();
+          socket = null;
+        }
+      }
+      function frame(f) {
+        const d = f.indexOf("\n\n"),
+          cmd = f.slice(0, f.indexOf("\n"));
+        if (d < 0) return;
+        if (cmd === "CONNECTED") {
+          socket.send(
+            "SUBSCRIBE\nid:events\ndestination:/user/queue/events\nack:auto\n\n\0",
+          );
+          return;
+        }
+        if (cmd !== "MESSAGE") return;
+        try {
+          event(JSON.parse(f.slice(d + 2)));
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+      function event(e) {
+        const p = e.payload;
+        if (!p) return;
+        if (e.type === "message") {
+          if (p.conversationId === activeConversationId) append(p);
+          else if (p.senderId !== me.id) {
+            const u = usersById.get(p.senderId);
+            if (u) {
+              unreadCounts.set(u.id, (unreadCounts.get(u.id) || 0) + 1);
+              badges();
+            }
+          }
+        } else if (p.conversationId === activeConversationId) refreshChat();
+        refreshUsers();
+      }
+      async function refreshChat() {
+        if (!activeConversationId) return;
+        try {
+          renderMessages(
+            await api(`/conversations/${activeConversationId}/messages`),
+            false,
+          );
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+      function bottom() {
+        return (
+          messages.scrollHeight - messages.scrollTop - messages.clientHeight <
+          48
+        );
+      }
+      function renderMessages(list, scroll) {
+        renderedMessageIds.clear();
+        if (!list.length) {
+          messages.innerHTML = `<div class="empty-chat"><div><strong>No messages yet</strong>Say hello to start the conversation.</div></div>`;
+          return;
+        }
+        messages.innerHTML = list.map(markup).join("");
+        list.forEach((m) => renderedMessageIds.add(m.id));
+        bindChecks();
+        if (scroll) messages.scrollTop = messages.scrollHeight;
+      }
+      function append(m) {
+        if (renderedMessageIds.has(m.id)) return;
+        const stick = bottom();
+        if (messages.querySelector(".empty-chat")) messages.innerHTML = "";
+        const h = document.createElement("div");
+        h.innerHTML = markup(m);
+        messages.append(h.firstElementChild);
+        renderedMessageIds.add(m.id);
+        bindChecks(messages.lastElementChild);
+        if (stick) messages.scrollTop = messages.scrollHeight;
+      }
+      function markup(m) {
+        const mine = m.senderId === me.id;
+        return `<article class="msg ${mine ? "mine" : ""}" data-id="${m.id}"><div class="msg-row">${mine ? '<input class="message-check" type="checkbox" aria-label="Select this message">' : ""}<span class="bubble">${escapeHtml(m.text)}</span></div><time class="message-time">${fullTime(m.sentAt)}${m.editedAt ? " · edited" : ""}</time></article>`;
+      }
+      function bindChecks(scope = document) {
+        [
+          ...(scope.matches?.(".message-check") ? [scope] : []),
+          ...(scope.querySelectorAll?.(".message-check") || []),
+        ].forEach(
+          (c) =>
+            (c.onchange = () => {
+              const id = Number(c.closest(".msg").dataset.id);
+              c.checked
+                ? selectedMessageIds.add(id)
+                : selectedMessageIds.delete(id);
+              c.closest(".msg").classList.toggle("selected", c.checked);
+              selectionCount.textContent = `${selectedMessageIds.size} selected`;
+              deleteButton.disabled = !selectedMessageIds.size;
+            }),
+        );
+      }
+      function selectMode(on) {
+        selectedMessageIds.clear();
+        messages.classList.toggle("selecting", on);
+        selection.hidden = !on;
+        selectButton.hidden = on || !activeConversationId;
+        document.querySelectorAll(".message-check").forEach((c) => {
+          c.checked = false;
+          c.closest(".msg").classList.remove("selected");
+        });
+        selectionCount.textContent = "0 selected";
+        deleteButton.disabled = true;
+      }
+      async function deleteSelected() {
+        const ids = [...selectedMessageIds];
+        if (
+          !ids.length ||
+          !confirm(
+            `Delete ${ids.length} selected message${ids.length === 1 ? "" : "s"} for everyone?`,
+          )
+        )
+          return;
+        try {
+          await api("/messages", {
+            method: "DELETE",
+            body: JSON.stringify({ messageIds: ids }),
+          });
+          selectMode(false);
+          refreshChat();
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+      async function clearChat() {
+        const u = usersById.get(activeUserId);
+        if (
+          !activeConversationId ||
+          !confirm(
+            `Clear every message in your conversation with ${u?.username || "this person"}? This cannot be undone for either participant.`,
+          )
+        )
+          return;
+        clearButton.disabled = true;
+        try {
+          await api(`/conversations/${activeConversationId}/messages`, {
+            method: "DELETE",
+          });
+          renderMessages([], false);
+          refreshUsers();
+        } catch (e) {
+          alert(e.message);
+        } finally {
+          clearButton.disabled = false;
+        }
+      }
+      async function send(e) {
+        e.preventDefault();
+        const text = messageText.value.trim();
+        if (!activeConversationId || !text) return;
+        try {
+          const m = await api(
+            `/conversations/${activeConversationId}/messages`,
+            { method: "POST", body: JSON.stringify({ text }) },
+          );
+          messageText.value = "";
+          append(m);
+          refreshUsers();
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+      function initials(n) {
+        return String(n)
+          .split(/[_\s]+/)
+          .map((x) => x[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+      }
+      function escapeHtml(t) {
+        return String(t).replace(
+          /[&<>]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c],
+        );
+      }
+      function fullTime(v) {
+        return v
+          ? new Intl.DateTimeFormat(undefined, {
+              hour: "numeric",
+              minute: "2-digit",
+            }).format(new Date(v))
+          : "";
+      }
+      function shortTime(v) {
+        if (!v) return "";
+        const d = new Date(v),
+          now = new Date();
+        return d.toDateString() === now.toDateString()
+          ? fullTime(v)
+          : new Intl.DateTimeFormat(undefined, {
+              month: "short",
+              day: "numeric",
+            }).format(d);
+      }
+      auth();
     </script>
-</body>
-
+  </body>
 </html>
